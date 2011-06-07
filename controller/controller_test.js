@@ -236,4 +236,33 @@ test("the right element", 1, function(){
 	$("#qunit-test-area").html("")
 })
 
+test("destroy controller with child controllers", function(){
+    var ta = $("<div id='root'><div id='nested'/></div>").appendTo( $("#qunit-test-area") )
+
+    $.Controller("NestedController",{
+	init: function(){
+            this.element.html('<input type="submit" value="Submit"/>');
+        }
+    });
+	
+    $.Controller("RootController",{
+	init: function() {
+            this.find('#nested').nested();
+	},
+        
+        '#nested input[type="submit"] click': function(el, ev) {
+            ev.preventDefault();
+            console.log("Nested was clicked.");
+        }
+    });
+
+    $('#root').root();
+    var rootController = $('#root').controller('root');
+    ok(rootController, "RootController is attached");
+    ok($('#nested').hasClass('nested'), "NestedController is attached");
+    $('input[type="submit"]').trigger('click');
+    rootController.destroy();
+    ok(!$('#root').hasClass('root'), "RootContoller is destroyed");
+});
+    
 });
